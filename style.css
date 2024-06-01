@@ -38,18 +38,10 @@ body {
 #menu {
     padding-top: 2rem;
     padding-bottom: 2rem;
-    margin-left: 24rem;
 }
 
-svg {
-    margin-left: 24rem;
-}
 
 h1 {
     padding-top: 1rem;
-    margin-left: 25rem;
-}
-
-#axis-text {
-    font-size: 5px;
+    margin-left: 1rem;
 }

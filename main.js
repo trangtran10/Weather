@@ -24,11 +24,9 @@ svg.selectAll('.background')
     .enter()
     .append('rect')
     .attr('class', 'background')
-    .attr('width', trellisWidth) // Use our trellis dimensions
+    .attr('width', trellisWidth) 
     .attr('height', trellisHeight)
     .attr('transform', function(d, i) {
-        // Position based on the matrix array indices.
-        // i = 1 for column 1, row 0)
         var tx = (i % 2) * (trellisWidth + padding.l + padding.r) + padding.l;
         var ty = Math.floor(i / 2) * (trellisHeight + padding.t + padding.b) + padding.t;
         return 'translate('+[tx, ty]+')';
