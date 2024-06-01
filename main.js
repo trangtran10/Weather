@@ -179,9 +179,9 @@ function updateChart(filterKey) {
             })
             .y(function(weather) {
                 return yScale(weather.record_min_temp);
-        }) 
-
+    }) 
     }
+    
     // Graphs the line
     path = d3.select("svg").selectAll('g.trellis')
         .append("path")
