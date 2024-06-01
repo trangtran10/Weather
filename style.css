@@ -23,14 +23,33 @@
 }
 
 .background {
-    fill: #eee;
+    fill: #fafafa;
 }
 
 body {
-    font-family: "Open Sans";
+    font-family: "Roboto";
     margin: 0;
 }
 
 #main {
     margin: 20px;
+}
+
+#menu {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+    margin-left: 24rem;
+}
+
+svg {
+    margin-left: 24rem;
+}
+
+h1 {
+    padding-top: 1rem;
+    margin-left: 25rem;
+}
+
+#axis-text {
+    font-size: 5px;
 }

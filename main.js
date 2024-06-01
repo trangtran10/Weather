@@ -1,24 +1,28 @@
-// **** Example of how to create padding and spacing for trellis plot****
-var svg = d3.select('svg');
+// Updates selection
+function onCategoryChanged() {
+    var select = d3.select('#categorySelect').node();
+    // Get current value of select element
+    category = select.options[select.selectedIndex].value;
+    console.log(category)
+    // Update chart with the selected category of letters
+    updateChart(category);
+}
 
-// Hand code the svg dimensions, you can also use +svg.attr('width') or +svg.attr('height')
+// Adding the svg
+var svg = d3.select('svg');
 var svgWidth = +svg.attr('width');
 var svgHeight = +svg.attr('height');
-
-// Define a padding object
-// This will space out the trellis subplots
 var padding = {t: 20, r: 20, b: 60, l: 60};
 
-// Compute the dimensions of the trellis plots, assuming a 2x2 layout matrix.
+// Dimensions of the trellis plots
 trellisWidth = svgWidth / 2 - padding.l - padding.r;
 trellisHeight = svgHeight / 2 - padding.t - padding.b;
 
-// As an example for how to layout elements with our variables
-// Lets create .background rects for the trellis plots
+// Background rects for the trellis plots
 svg.selectAll('.background')
-    .data(['A', 'B', 'C', 'C']) // dummy data
+    .data(['A', 'B', 'C', 'D'])
     .enter()
-    .append('rect') // Append 4 rectangles
+    .append('rect')
     .attr('class', 'background')
     .attr('width', trellisWidth) // Use our trellis dimensions
     .attr('height', trellisHeight)
@@ -30,31 +34,32 @@ svg.selectAll('.background')
         return 'translate('+[tx, ty]+')';
     });
 
-var parseDate = d3.timeParse("%Y-%m-%d");
-// To speed things up, we have already computed the domains for your scales
-var dateDomain = [new Date(2014, 6, 1), new Date(2015, 5, 30)];
-var tempDomain = [0, 105];
 
-// **** How to properly load data ****
-
+// Load data
 d3.csv('locations.csv').then(function(dataset) {
 
-// **** Your JavaScript code goes here ****
-    for (count = 0; count < dataset.length; count++) {
-        console.log(dataset[count].date)
-        dataset[count].date = parseDate(dataset[count].date)
-        console.log(dataset[count].date)
+    // Store data
+    weather = dataset;
+    parseDate = d3.timeParse("%Y-%m-%d");
+
+    // Domains
+    dateDomain = [new Date(2014, 5, 30), new Date(2015, 5, 30)];
+    tempDomain = [-27, 122];
+
+    // Parse
+    for (count = 0; count < weather.length; count++) {
+        weather[count].date = parseDate(weather[count].date)
     }
 
-    var nested = d3.nest()
-        .key(function(dataset) {
-            return dataset.location;
+    // Nesting
+    nested = d3.nest()
+        .key(function(weather) {
+            return weather.location;
         })
-        .entries(dataset);
-    
-    console.log(nested)
+        .entries(weather);
 
-    var group = svg.selectAll('.sector')
+    // Adding group
+    group = svg.selectAll('.sector')
         .data(nested)
         .enter()
         .append("g")
@@ -65,85 +70,67 @@ d3.csv('locations.csv').then(function(dataset) {
             return 'translate('+[tx, ty]+')';
         });
 
-        
-    var xScale = d3.scaleTime()
+    //Scales
+    xScale = d3.scaleTime()
         .domain(dateDomain)
         .range([0, trellisWidth])
 
-    var yScale = d3.scaleLinear(tempDomain)
+    yScale = d3.scaleLinear(tempDomain)
         .domain(tempDomain)
         .range([trellisHeight, 0])
 
-
-    var lineInterpolate = d3.line()
-        .x(function(dataset) {
-            return xScale(dataset.date);
+    // Line
+    lineInterpolate = d3.line()
+        .x(function(weather) {
+            return xScale(weather.date);
         })
-        .y(function(dataset) {
-            return yScale(dataset.actual_mean_temp);
+        .y(function(weather) {
+            return yScale(weather.actual_mean_temp);
         })
 
+    path = d3.select("svg").selectAll('g.trellis')
+        .append("path")
+        .attr("class", "line-plot")
+        .attr("id", "line-display")
 
-    var path = d3.select("svg").selectAll('g.trellis')
-            .append("path")
-            .attr("class", "line-plot")
 
-    
-    var line = d3.selectAll("path.line-plot")
-        .attr('d', function(dataset) {
-            return lineInterpolate(dataset.values);
+    line = d3.selectAll("path.line-plot")
+        .attr('d', function(weather) {
+            return lineInterpolate(weather.values);
         })
         .style("stroke", "#333")
 
+    // Axis
+    xAxis = d3.axisBottom(xScale)
 
-    var xAxis = d3.axisBottom(xScale)
-    var axisX = group.append("g")
+    axisX = group.append("g")
         .attr("class", "x-axis")
         axisX.call(xAxis)
         .attr("transform", "translate(0," + trellisHeight +")")
+        .selectAll("text")
+        .style("text-anchor", "end")
+        .attr("transform", "rotate(-65)")
 
-
-    var yAxis = d3.axisLeft(yScale)
+    yAxis = d3.axisLeft(yScale)
     
-    var axisY = group.append("g")
+    axisY = group.append("g")
         .attr("class", "y-axis")
         axisY.call(yAxis)
 
-    var xGrid = d3.axisTop(xScale)
-        .tickSize(-trellisHeight, 0, 0)
-        .tickFormat('')
-
-    var yGrid = d3.axisLeft(yScale)
-        .tickSize(-trellisWidth, 0, 0)
-        .tickFormat('')
-
-    var grid = d3.select("svg").selectAll('g.trellis')
-        .append("g")
-        .attr("class", "x grid")
-        .call(xGrid)
-
-
-    var grid = d3.select("svg").selectAll('g.trellis')
-        .append("g")
-        .attr("class", "y grid")
-        .call(yGrid)
-
-    var placeList = []
-    var name = ""
+    // Array for location Labels
+    placeList = []
+    place = ""
     for (count = 0; count < nested.length; count++) {
-        name = nested[count].key.toString()
-        console.log(name)
-        placeList.push(name)
+        place = nested[count].key.toString()
+        console.log(place )
+        placeList.push(place)
     }
 
-    var colorScale =  d3.scaleOrdinal(d3.schemeCategory10)
+    // Color scale
+    colorScale =  d3.scaleOrdinal(d3.schemeTableau10)
 
-    line.style("stroke",function(d, i){
-        return d.color = colorScale(i);
-    });
-
-    
-    var title = d3.select("svg").selectAll('g.trellis')
+    // Labeling
+    title = d3.select("svg").selectAll('g.trellis')
         .append("text")
         .attr("class", "location-label")
         .text(function(d) {
@@ -154,19 +141,58 @@ d3.csv('locations.csv').then(function(dataset) {
         })
         .attr("transform", "translate(130,30)")
 
-
-    var label1 = d3.select("svg").selectAll('g.trellis')
+    label1 = d3.select("svg").selectAll('g.trellis')
         .append("text")
         .attr("class", "x axis-label")
         .text("Month")
-        .attr("transform", "translate(130,254)")
+        .attr("transform", "translate(130,275)")
 
-    var label2 = d3.select("svg").selectAll('g.trellis')
+    label2 = d3.select("svg").selectAll('g.trellis')
         .append("text")
         .attr("class", "y axis-label")
         .text("Average temperature")
         .attr("transform", "translate(-30,110) rotate(-90)")
-
 });
 
-// Remember code outside of the data callback function will run before the data loads
+// Updates the graphs
+function updateChart(filterKey) {
+    // Changing data based on selection
+    if (filterKey === "actual-temperature") {  
+        var lineInterpolate = d3.line()
+            .x(function(weather) {
+                return xScale(weather.date);
+            })
+            .y(function(weather) {
+                return yScale(weather.actual_mean_temp);
+        }) 
+
+    } else if (filterKey === "max-temperature") {  
+        var lineInterpolate = d3.line()
+            .x(function(weather) {
+                return xScale(weather.date);
+            })
+            .y(function(weather) {
+                return yScale(weather.record_max_temp);
+        }) 
+    } else {
+        var lineInterpolate = d3.line()
+            .x(function(weather) {
+                return xScale(weather.date);
+            })
+            .y(function(weather) {
+                return yScale(weather.record_min_temp);
+        }) 
+
+    }
+    // Graphs the line
+    path = d3.select("svg").selectAll('g.trellis')
+        .append("path")
+        .attr("class", "line-plot")
+        .attr("id", "line-display")
+
+    line = d3.selectAll("path.line-plot")
+        .attr('d', function(weather) {
+        return lineInterpolate(weather.values);
+    })
+        .style("stroke", "FF4433")
+}

@@ -6,9 +6,20 @@
     <link rel="stylesheet" href="./style.css">
 </head>
 <body>
+    <h1>Temperature Comparision</h1>
     <div id="main">
-        <svg width="680" height="600" style="border: 1px solid #777;">
+        <div id="menu">
+            <label for="categorySelect">Temperature Type</label>
+            <select class="custom-select" id="categorySelect" onchange="onCategoryChanged()">
+              <option selected value="actual-temperature">Actual Temperature</option>
+              <option value="max-temperature">Highest Recorded Temperature</option>
+              <option value="min-temperature">Lowest Recorded Temperature</option>
+            </select>
+        </div>
+        <svg id="graphs" width="670" height="600" style="border: 1px solid #777;">
         </svg>
+            </div>
+        </body>
     </div>
 </body>
 <script src="https://d3js.org/d3.v5.min.js"></script>
