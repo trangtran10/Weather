@@ -148,7 +148,7 @@ d3.csv('locations.csv').then(function(dataset) {
     label2 = d3.select("svg").selectAll('g.trellis')
         .append("text")
         .attr("class", "y axis-label")
-        .text("Average temperature")
+        .text("Temperature")
         .attr("transform", "translate(-30,110) rotate(-90)")
 });
 
