@@ -188,9 +188,9 @@ function updateChart(filterKey) {
         .attr("class", "line-plot")
         .attr("id", "line-display")
 
+    colorScale =  d3.scaleOrdinal(d3.schemeTableau10)
     line = d3.selectAll("path.line-plot")
         .attr('d', function(weather) {
-        return lineInterpolate(weather.values);
-    })
-        .style("stroke", "FF4433")
+            return lineInterpolate(weather.values);
+        })
 }
